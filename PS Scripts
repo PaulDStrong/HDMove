@@ -1,0 +1,68 @@
+#I used this script I used the user's name to pull the SamAccount name and get the location of their home directory
+#and export that information into a .csv
+
+import-module activedirectory
+
+ 
+
+$Users = foreach ($user in $(get-content C:\PaulScript\HomeDrive\SamAcct.txt))
+
+ 
+
+{
+
+Get-ADUser $user -Properties name, homedirectory
+
+}
+
+ $users | Select-Object SamAccountName, homedirectory | Export-Csv -path C:\PaulScript\HomeDrive\HDloc.csv
+ 
+ 
+
+#This script was run against usernames and cleared their home directory, setting it as local.  This was important in my domain.
+
+Import-Csv -Path C:\PaulScript\HomeDrive\SamAcct.csv | ForEach-Object {
+
+    # Retrieve DN of User.
+
+    $UserDN = (Get-ADUser -Identity $_.UserName).distinguishedName | Set-ADUser -Clear homeDirectory}
+    
+#This script was used to move the users to a new OU before assigning new HD.
+
+$TargetOU = "ou=Users,ou=Location,ou=Domain,dc=Domain,dc=Domain,dc=net"
+
+ 
+
+# Read user sAMAccountNames from csv file (field labeled "Name").
+
+Import-Csv -Path C:\PaulScript\HomeDrive\SamAcct.csv | ForEach-Object {
+
+    # Retrieve DN of User.
+
+    $UserDN = (Get-ADUser -Identity $_.UserName).distinguishedName
+
+ 
+
+    # Move user to target OU.
+
+    Move-ADObject -Identity $UserDN -TargetPath $TargetOU
+
+}
+
+    
+#In my environment I wasn't able to create the homedrives without using an in house application that tracked and assigned based off
+#a subset of information I didn't have access to.  It didn't always work, so I had to force feed some users the new HD.  
+#After -homedrive any letter can be used for assignment
+
+ 
+
+set-aduser FRANKFRANK -homedirectory \\file.server.domain.net\somefolder\FrankFrank\Data -homedrive H:
+
+
+
+ 
+
+
+ 
+
+ 
