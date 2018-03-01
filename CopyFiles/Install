@@ -1,0 +1,37 @@
+#This part of the powershell script takes a list of computers and copies files from a server location to a location on each machine.
+
+#Variables
+
+$computername = Get-Content C:\PaulScript\Computers.txt
+
+$sourcefile = "C:\PaulScript\Software\*"
+
+#This section will install the software
+
+foreach ($computer in $computername)
+
+{
+
+    $destinationFolder = "\\$computer\C$\"
+
+    #It will copy $sourcefile to the $destinationfolder. If the Folder does not exist it will create it.
+
+ 
+
+    if (!(Test-Path -path $destinationFolder))
+
+    {
+
+        New-Item $destinationFolder -Type Directory
+
+    }
+
+       #Adding –Recurse/-Verbose to this bit of the script allows the entire content of directory to be copied.
+
+    Copy-Item -Recurse -Path $sourcefile -Destination $destinationFolder -Verbose
+
+    }
+
+ #This part of the script is a commhandline to install said software
+
+C:\PsTools>psexec @C:\PaulScript\Computers.txt –u username –p password c:\drivers\install.bat -silent
